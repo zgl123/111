@@ -1,0 +1,95 @@
+#include <cstdio>
+#include <cstring>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+#define MAXN    1001
+#define MAXM    10001
+#define INF     0x3f3f3f3f
+
+struct Edge
+{
+    int v, w, next;
+} edge[MAXM];
+
+int head[MAXN], dis[MAXN], used[MAXN];
+int e_cnt, want_list[MAXN], near_list[MAXN];
+
+void addedge(int u, int v, int w)
+{
+    edge[e_cnt].v = v;
+    edge[e_cnt].w = w;
+    edge[e_cnt].next = head[u];
+    head[u] = e_cnt ++;
+    swap(u, v);
+    edge[e_cnt].v = v;
+    edge[e_cnt].w = w;
+    edge[e_cnt].next = head[u];
+    head[u] = e_cnt ++;
+}
+
+int spfa(int src, int des)
+{
+    int u, v;
+    queue<int> q;
+    fill(dis, dis+MAXN, INF);
+    memset(used, 0, sizeof(used));
+    dis[src] = 0;
+    used[src] = 1;
+    q.push(src);
+    while( !q.empty() )
+    {
+        u = q.front();
+        q.pop();
+        used[u] = 0;
+        for(int i = head[u]; -1 != i; i = edge[i].next)
+        {
+            v = edge[i].v;
+            if( dis[v] < dis[u]+edge[i].w )
+            {
+                continue;
+            }
+            if( !used[v] )
+            {
+                q.push(v);
+            }
+            dis[v] = dis[u]+edge[i].w;
+        }
+    }
+    return dis[des];
+}
+
+int main(int argc, char const *argv[])
+{
+    
+    int T, S, D, u, v, w, ans;
+    while( ~scanf("%d %d %d", &T, &S, &D) )
+    {
+        e_cnt = 0;
+        memset(head, -1, sizeof(head));
+        for(int i = 0; i < T; i ++)
+        {
+            scanf("%d %d %d", &u, &v, &w);
+            addedge(u, v, w);
+        }
+        for(int i = 0;  i < S; i ++)
+        {
+            scanf("%d", &near_list[i]);
+        }
+        for(int i = 0;  i < D; i ++)
+        {
+            scanf("%d", &want_list[i]);
+        }
+        ans = INF;
+        for(int i = 0; i < S; i ++)
+        {
+            for(int j = 0; j < D; j ++)
+            {
+                ans = min(ans, spfa(near_list[i], want_list[j]));
+            }
+        }
+        printf("%d\n", ans);
+    }
+    return 0;
+}
